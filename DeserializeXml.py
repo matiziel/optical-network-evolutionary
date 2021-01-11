@@ -1,19 +1,44 @@
 import xml.etree.ElementTree as ET
-
+from Demand import Demand
 
 class Deserializer:
     def __init__(self):
-        self.tree = ET.parse('./Data/polska.xml')
+        tree = ET.parse('./Data/polska.xml')
         self.root = tree.getroot()
 
     def getVertices(self):
-        root['']
+        vertices = []
+        for child in self.root[0][0]:
+            vertices.append(child.attrib['id'])
+        return vertices
 
+    def getEdges(self):
+        edges = []
+        for child in self.root[0][1]:
+            link = child.attrib['id'].split('_')
+            edges.append((int(link[1]),int(link[2])))
+        return edges
 
-tree = ET.parse('./Data/polska.xml')
-root = tree.getroot()
-# for child in root:
-#     for c in child:
-#         print(c.attrib)
+    def getDemands(self):
+        demands = []
+        for demand in self.root[1]:
+            cities = demand.attrib['id'].split('_')
 
-print(root[0][1][0].attrib)
+            link = (cities[1], cities[2])
+            value = demand[2].text
+            paths = self.getAdmissiblePaths(demand[3])
+
+            newdemand = Demand(link,value,paths)
+            demands.append(newdemand)
+        return demands
+
+    def getAdmissiblePaths(self, data):
+        paths = []
+        for path in data:
+            partialPath = []
+            for link in path:
+                cities = link.text.split('_')
+                partialPath.append((cities[1], cities[2]))
+            paths.append(partialPath)
+        return paths
+
