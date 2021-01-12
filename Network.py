@@ -12,8 +12,8 @@ class Network:
         print(self.graph.vertices)
         print(self.graph.edges)
         print()
-        for child in self.demands:
-            print(child)
+        for demand in self.demands:
+            print(demand)
 
 network = Network()
 network.print()
