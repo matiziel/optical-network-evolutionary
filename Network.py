@@ -14,6 +14,13 @@ class Network:
         print()
         for demand in self.demands:
             print(demand)
+    
+    def getDemandNum(self):
+        return len(self.demands)
 
-network = Network()
-network.print()
+    def getMaxDemand(self):
+        max = 0
+        for demand in self.demands:
+            if demand.value > max:
+                max = demand.value
+        return max + 1

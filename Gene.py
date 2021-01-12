@@ -21,5 +21,3 @@ class Gene:
     def crossover(self, partner):
         if len(self.alleles) != len(partner.alleles):
             print("ERROR")
-
-gene = Gene(3, 100)

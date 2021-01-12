@@ -25,7 +25,7 @@ class Deserializer:
             cities = demand.attrib['id'].split('_')
 
             link = (cities[1], cities[2])
-            value = demand[2].text
+            value = int(float(demand[2].text))
             paths = self.getAdmissiblePaths(demand[3])
 
             newdemand = Demand(link,value,paths)
