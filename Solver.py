@@ -1,20 +1,41 @@
 from Network import Network
 from Chromosome import Chromosome
-from random import sample
 
-PathNumParam = 2
+class Solver:
+    def __init__(self):
+        filename = './Data/sample.xml'
+        # filename = './Data/polska.xml'
+        self.network = Network(filename)
+        self.paramPathNum = 2
+        self.cards = [(10,2), (40,5), (100, 9)]
+        self.population = []
+        self.log = []
+    
+    def populate(self, count):
+        minCardValue = sorted(self.cards)[0][0]
+        maxCardCount = int(self.network.getMaxDemand() / minCardValue)
+        for _ in range(count): #TODO madrzejsza generacja
+            self.population.append(Chromosome(self.network.getDemandNum(), self.paramPathNum, len(self.cards), maxCardCount))
+    
+    def newGeneration(self):
+        if self.population == []:
+            print("pusto")
+        # pick parent pairs
+        # produce children
+        # assign value to every child
+        # save children to log ( delete worst?? stala pamiec ale tracimy historie)
+        # create new population
+    
+    def checkOsobnik(self, chromosome):
+        self.network.resetFlow()
+        for geneInd, gene in enumerate(chromosome):
+            paths = self.network.getDemandPaths(geneInd, self.paramPathNum)
+            for alleleInd, allele in enumerate(gene):
+                path = paths[alleleInd]
+                cards = sum(allele)
+                for link in path:
+                    self.network.incrementFlow(link, cards)
 
-network = Network()
-chromosome1 = Chromosome(network.getDemandNum(), PathNumParam, network.getCardNum())
-chromosome2 = Chromosome(network.getDemandNum(), PathNumParam, network.getCardNum())
-
-
-children = Chromosome.kPointCrossover(chromosome1, chromosome2, 2)
-children[0].print()
-
-
-#1 nie moga byc z gory ustalone wartosci na danym polaczeniu 0,10,40,100, bo mozemy miec na jednej linii nnp 80 (jezeli chcemy koszty kart jako parametry
-#2 jak robic ten crossover, na poziomie genu czy allelu? chyba obu, zeby sie wszystko ladnie zmienialo. oba tak samo? inaczej? odwrotnie?
-#3 najwiekszy demand = 198
-#4 trzeba jakos graph tymczasowy robic, zeby krawedzie uzupelniac. inna klasa? ta sama? dziedziczenie?
-#5 compute cost moglby byc jedna funkcja, klasa potrzebna? moze dac go jako metode do klasy wyzej
+solver = Solver()
+solver.populate(10)
+print(solver.population[0].getMatrix())

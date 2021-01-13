@@ -3,5 +3,6 @@ class Demand:
         self.link = link
         self.value = value
         self.paths = paths
-    def __str__(self):
-        return str(self.link) + "\n" + str(self.value) + "\n" + str(self.paths)
+    
+    def getPaths(self):
+        return self.paths

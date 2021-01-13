@@ -2,8 +2,8 @@ import xml.etree.ElementTree as ET
 from Demand import Demand
 
 class Deserializer:
-    def __init__(self):
-        tree = ET.parse('./Data/polska.xml')
+    def __init__(self, filename):
+        tree = ET.parse(filename)
         self.root = tree.getroot()
 
     def getCities(self):

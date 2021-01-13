@@ -6,5 +6,5 @@ class Flow:
         for edgeInd in self.edges:
             self.edges[edgeInd] = 0
     
-    def increment(self, link):
-        self.edges[link] += 1
+    def increment(self, link, value):
+        self.edges[link] += value

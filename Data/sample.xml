@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<network xmlns="http://sndlib.zib.de/network" version="1.0">
+ <networkStructure>
+  <nodes coordinatesType="geographical">
+   <node id="Lodz"></node>
+   <node id="Wroclaw"></node>
+   <node id="Katowice"></node>
+  </nodes>
+  <links>
+   <link id="Link_0_1">
+    <source>Lodz</source>
+    <target>Wroclaw</target>
+   <link id="Link_0_2">
+    <source>Lodz</source>
+    <target>Katowice</target>
+   </link>
+   <link id="Link_1_2">
+    <source>Wroclaw</source>
+    <target>Katowice</target>
+   </link>
+   </link>
+  </links>
+ </networkStructure>
+ <demands>
+  <demand id="Demand_0_1">
+    <source>Lodz</source>
+    <target>Wroclaw</target>
+   <demandValue>100.0</demandValue>
+   <admissiblePaths>
+    <admissiblePath id="P_0">
+     <linkId>Link_0_1</linkId>
+    </admissiblePath>
+    <admissiblePath id="P_1">
+     <linkId>Link_0_2</linkId>
+     <linkId>Link_1_2</linkId>
+    </admissiblePath>
+   </admissiblePaths>
+  </demand>
+  <demand id="Demand_0_2">
+    <source>Lodz</source>
+    <target>Wroclaw</target>
+   <demandValue>150.0</demandValue>
+   <admissiblePaths>
+    <admissiblePath id="P_0">
+     <linkId>Link_0_2</linkId>
+    </admissiblePath>
+    <admissiblePath id="P_1">
+     <linkId>Link_0_1</linkId>
+     <linkId>Link_1_2</linkId>
+    </admissiblePath>
+   </admissiblePaths>
+  </demand>
+  <demand id="Demand_1_2">
+    <source>Wroclaw</source>
+    <target>Katowice</target>
+   <demandValue>50.0</demandValue>
+   <admissiblePaths>
+    <admissiblePath id="P_0">
+     <linkId>Link_1_2</linkId>
+    </admissiblePath>
+    <admissiblePath id="P_1">
+     <linkId>Link_0_1</linkId>
+     <linkId>Link_0_2</linkId>
+    </admissiblePath>
+   </admissiblePaths>
+  </demand>
+ </demands>
+</network>

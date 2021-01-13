@@ -1,29 +1,18 @@
-from random import randint
-from numpy.random import normal
-
-#TODO caly plik do zmiany
+from Allele import Allele
 
 class Gene:
-    def __init__(self,  alleleNum, maxValue):
+    def __init__(self,  alleleNum, cardNum, maxValue):
         self.alleles = []
         for _ in range(alleleNum):
-            newAllele = randint(0,maxValue)
+            newAllele = Allele(cardNum, maxValue)
             self.alleles.append(newAllele)
-        self.mutation(maxValue)
     
-    def print(self):
+    def mutation(self, mutationProb):
         for allele in self.alleles:
-            print(allele)
-
-    def mutation(self, maxValue):
-        deviation = 5 
-        for alleleInd, _ in enumerate(self.alleles):
-            oldAllele = self.alleles[alleleInd]
-            change = int(normal(0, deviation))
-            newAllele = oldAllele + change
-            newAllele = max(min(newAllele, maxValue), 0)
-            self.alleles[alleleInd] = newAllele
+            allele.mutation(mutationProb)
     
-    def crossover(self, partner):
-        if len(self.alleles) != len(partner.alleles):
-            print("ERROR")
+    def getCost(self, costs):
+        cost = 0
+        for allele in self.alleles:
+            cost += allele.getCost(costs)
+        return cost
