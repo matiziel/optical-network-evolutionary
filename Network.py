@@ -10,13 +10,6 @@ class Network:
         self.demands = data.getDemands()
         self.flow = Flow(data.getFlowEdges())
     
-    def print(self):
-        print(self.graph.vertices)
-        print(self.graph.edges)
-        print()
-        for demand in self.demands:
-            print(demand)
-    
     def getDemandNum(self):
         return len(self.demands)
 

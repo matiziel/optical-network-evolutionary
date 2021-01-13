@@ -27,8 +27,8 @@ class Chromosome:
 
     @staticmethod
     def kPointCrossover(chromo1, chromo2, K):
-        child1 = chromo1.genes
-        child2 = chromo2.genes
+        child1 = chromo1.genes.copy()
+        child2 = chromo2.genes.copy()
         if len(child1) != len(child2):
             raise Exception("Different gene count in crossover")
         cutPoints = sample(range(1,len(child1)), 2)
