@@ -34,4 +34,10 @@ class Network:
         self.flow.increment(link, value)
 
     def getDemandPaths(self, demandInd, count):
-        return self.demands[demandInd].getPaths[0:count-1]
+        return self.demands[demandInd].getPaths()[0:count]
+
+    def checkPathLimit(self, limit):
+        for edgeInd in self.flow.edges:
+            if self.flow.edges[edgeInd] > limit:
+                return False
+        return True

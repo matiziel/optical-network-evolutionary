@@ -15,6 +15,7 @@ class Solver:
     def populate(self, count):
         minCardValue = sorted(self.cards)[0][0]
         maxCardCount = int(self.network.getMaxDemand() / minCardValue)
+        maxCardCount = 6
         for _ in range(count):
             self.population.append(Chromosome(self.network.getDemandNum(), self.paramPathNum, len(self.cards), maxCardCount))
     
@@ -26,17 +27,35 @@ class Solver:
         # assign value to every child
         # create new population
     
-    def checkOsobnik(self, chromosome):
+    def evaluateIndividual(self, chromosome):
         self.network.resetFlow()
-        for geneInd, gene in enumerate(chromosome):
+        for geneInd, gene in enumerate(chromosome.genes):
             paths = self.network.getDemandPaths(geneInd, self.paramPathNum)
-            for alleleInd, allele in enumerate(gene):
+            for alleleInd, allele in enumerate(gene.alleles):
                 path = paths[alleleInd]
-                cards = sum(allele)
+                cards = sum(allele.alleleParts)
                 for link in path:
                     self.network.incrementFlow(link, cards)
-                    #TODO: jezeli przepelniony, return 0
-        return chromosome.getCost()
+
+        isOk = self.network.checkPathLimit(1000) #check if path limit 8, 16, 32, 96 satisfied
+        if not(isOk):
+            return float('inf')
+        isOk = self.__checkDemandSatisfied(chromosome) #check if demands satisfied
+        if not(isOk):
+            return float('inf')
+        return chromosome.getCost(self.cards)
+    
+    def __checkDemandSatisfied(self, chromosome):
+        for geneInd, gene in enumerate(chromosome.genes):
+            flow = 0
+            for allele in gene.alleles:
+                for allelePartInd, allelePart in enumerate(allele.alleleParts):
+                    flow += allelePart * self.cards[allelePartInd][0]
+            print(flow)
+            if flow < self.network.demands[geneInd].value:
+                return False
+        return True
 
 solver = Solver(5)
-print(solver.population[0].getMatrix())
+print("chromosome: ", solver.population[0].getMatrix())
+print("value: ", solver.evaluateIndividual(solver.population[0]))

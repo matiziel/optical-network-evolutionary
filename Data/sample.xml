@@ -2,30 +2,78 @@
 <network xmlns="http://sndlib.zib.de/network" version="1.0">
  <networkStructure>
   <nodes coordinatesType="geographical">
-   <node id="Lodz"></node>
-   <node id="Wroclaw"></node>
-   <node id="Katowice"></node>
+   <node id="Gdansk">
+    <coordinates>
+     <x>18.6</x>
+     <y>54.2</y>
+    </coordinates>
+   </node>
+   <node id="Bydgoszcz">
+    <coordinates>
+     <x>17.9</x>
+     <y>53.1</y>
+    </coordinates>
+   </node>
+   <node id="Kolobrzeg">
+    <coordinates>
+     <x>16.1</x>
+     <y>54.2</y>
+    </coordinates>
+   </node>
   </nodes>
   <links>
    <link id="Link_0_1">
-    <source>Lodz</source>
-    <target>Wroclaw</target>
+    <source>Gdansk</source>
+    <target>Warsaw</target>
+    <setupCost>156.0</setupCost>
+    <additionalModules>
+     <addModule>
+      <capacity>155.0</capacity>
+      <cost>156.0</cost>
+     </addModule>
+     <addModule>
+      <capacity>622.0</capacity>
+      <cost>468.0</cost>
+     </addModule>
+    </additionalModules>
+   </link>
    <link id="Link_0_2">
-    <source>Lodz</source>
-    <target>Katowice</target>
+    <source>Gdansk</source>
+    <target>Kolobrzeg</target>
+    <setupCost>272.0</setupCost>
+    <additionalModules>
+     <addModule>
+      <capacity>155.0</capacity>
+      <cost>272.0</cost>
+     </addModule>
+     <addModule>
+      <capacity>622.0</capacity>
+      <cost>816.0</cost>
+     </addModule>
+    </additionalModules>
    </link>
    <link id="Link_1_2">
-    <source>Wroclaw</source>
-    <target>Katowice</target>
-   </link>
+    <source>Bydgoszcz</source>
+    <target>Kolobrzeg</target>
+    <setupCost>156.0</setupCost>
+    <additionalModules>
+     <addModule>
+      <capacity>155.0</capacity>
+      <cost>156.0</cost>
+     </addModule>
+     <addModule>
+      <capacity>622.0</capacity>
+      <cost>468.0</cost>
+     </addModule>
+    </additionalModules>
    </link>
   </links>
  </networkStructure>
  <demands>
   <demand id="Demand_0_1">
-    <source>Lodz</source>
-    <target>Wroclaw</target>
-   <demandValue>100.0</demandValue>
+   <source>Gdansk</source>
+   <target>Bydgoszcz</target>
+   <demandValue>195.0</demandValue>
    <admissiblePaths>
     <admissiblePath id="P_0">
      <linkId>Link_0_1</linkId>
@@ -37,9 +85,9 @@
    </admissiblePaths>
   </demand>
   <demand id="Demand_0_2">
-    <source>Lodz</source>
-    <target>Wroclaw</target>
-   <demandValue>150.0</demandValue>
+   <source>Gdansk</source>
+   <target>Kolobrzeg</target>
+   <demandValue>158.0</demandValue>
    <admissiblePaths>
     <admissiblePath id="P_0">
      <linkId>Link_0_2</linkId>
@@ -51,9 +99,9 @@
    </admissiblePaths>
   </demand>
   <demand id="Demand_1_2">
-    <source>Wroclaw</source>
-    <target>Katowice</target>
-   <demandValue>50.0</demandValue>
+   <source>Gdansk</source>
+   <target>Katowice</target>
+   <demandValue>174.0</demandValue>
    <admissiblePaths>
     <admissiblePath id="P_0">
      <linkId>Link_1_2</linkId>
