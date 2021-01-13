@@ -1,12 +1,15 @@
 from Graph import Graph
+from Flow import Flow
 from Demand import Demand
 from DeserializeXml import Deserializer
 
 class Network:
     def __init__(self):
         data = Deserializer()
-        self.graph = Graph(data)
+        self.graph = Graph(data.getCities(), data.getLinks())
         self.demands = data.getDemands()
+        self.flow = Flow(data.getFlowEdges())
+        self.cards = [(10,2),(40,5),(100,9)]
     
     def print(self):
         print(self.graph.vertices)
@@ -15,12 +18,10 @@ class Network:
         for demand in self.demands:
             print(demand)
     
+    def getCardNum(self):
+        return len(self.cards)
+
     def getDemandNum(self):
         return len(self.demands)
 
-    def getMaxDemand(self):
-        max = 0
-        for demand in self.demands:
-            if demand.value > max:
-                max = demand.value
-        return max + 1
+network = Network()

@@ -1,4 +1,4 @@
 class Graph:
-    def __init__(self, data):
-        self.vertices = data.getVertices()
-        self.edges = data.getEdges()
+    def __init__(self, vertices, edges):
+        self.vertices = vertices
+        self.edges = edges

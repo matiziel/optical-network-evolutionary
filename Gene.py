@@ -1,6 +1,8 @@
 from random import randint
 from numpy.random import normal
 
+#TODO caly plik do zmiany
+
 class Gene:
     def __init__(self,  alleleNum, maxValue):
         self.alleles = []
@@ -8,6 +10,10 @@ class Gene:
             newAllele = randint(0,maxValue)
             self.alleles.append(newAllele)
         self.mutation(maxValue)
+    
+    def print(self):
+        for allele in self.alleles:
+            print(allele)
 
     def mutation(self, maxValue):
         deviation = 5 

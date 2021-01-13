@@ -1,19 +1,16 @@
 from Network import Network
 from Chromosome import Chromosome
+from random import sample
 
 PathNumParam = 2
 
 network = Network()
-chromosome1 = Chromosome(network.getDemandNum(), PathNumParam, network.getMaxDemand())
-chromosome2 = Chromosome(network.getDemandNum(), PathNumParam, network.getMaxDemand())
-print(chromosome1.getMatrix())
-print(chromosome2.getMatrix())
+chromosome1 = Chromosome(network.getDemandNum(), PathNumParam, network.getCardNum())
+chromosome2 = Chromosome(network.getDemandNum(), PathNumParam, network.getCardNum())
 
 
-
-
-
-
+children = Chromosome.kPointCrossover(chromosome1, chromosome2, 2)
+children[0].print()
 
 
 #1 nie moga byc z gory ustalone wartosci na danym polaczeniu 0,10,40,100, bo mozemy miec na jednej linii nnp 80 (jezeli chcemy koszty kart jako parametry

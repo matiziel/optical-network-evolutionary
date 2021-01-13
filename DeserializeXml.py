@@ -6,13 +6,21 @@ class Deserializer:
         tree = ET.parse('./Data/polska.xml')
         self.root = tree.getroot()
 
-    def getVertices(self):
+    def getCities(self):
         vertices = []
         for child in self.root[0][0]:
             vertices.append(child.attrib['id'])
         return vertices
 
-    def getEdges(self):
+    def getFlowEdges(self):
+        edges = {}
+        for child in self.root[0][1]:
+            link = child.attrib['id'].split('_')
+            index = (int(link[1]),int(link[2]))
+            edges[index] = 0
+        return edges
+
+    def getLinks(self):
         edges = []
         for child in self.root[0][1]:
             link = child.attrib['id'].split('_')
