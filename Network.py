@@ -32,5 +32,6 @@ class Network:
     def checkPathLimit(self, limit):
         for edgeInd in self.flow.edges:
             if self.flow.edges[edgeInd] > limit:
+                print(self.flow.edges[edgeInd])
                 return False
         return True

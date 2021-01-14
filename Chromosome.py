@@ -1,6 +1,7 @@
 from random import randint, sample
 from numpy.random import normal
 from Gene import Gene
+from copy import deepcopy
 
 class Chromosome:
     def __init__(self, geneNum, alleleNum, allelePartNum, maxValue):
@@ -27,8 +28,8 @@ class Chromosome:
 
     @staticmethod
     def kPointCrossover(chromo1, chromo2, K):
-        child1 = chromo1.genes.copy()
-        child2 = chromo2.genes.copy()
+        child1 = deepcopy(chromo1.genes)
+        child2 = deepcopy(chromo2.genes)
         if len(child1) != len(child2):
             raise Exception("Different gene count in crossover")
         cutPoints = sample(range(1,len(child1)), 2)
