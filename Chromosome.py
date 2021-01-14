@@ -22,9 +22,9 @@ class Chromosome:
             chromoList.append(genList)
         return chromoList
 
-    def mutation(self, mutationProb):
+    def mutation(self, deviation):
         for gene in self.genes:
-            gene.mutation(mutationProb)
+            gene.mutation(deviation)
 
     @staticmethod
     def kPointCrossover(chromo1, chromo2, K):

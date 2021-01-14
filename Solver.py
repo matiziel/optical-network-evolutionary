@@ -1,15 +1,18 @@
 from Network import Network
 from Chromosome import Chromosome
+
 from copy import deepcopy
+from random import randint
 
 class Solver:
     def __init__(self):
         self.populationSize = 10
-        self.limit = 200
-        self.K = 2
-        self.paramPathNum = 2
-        self.cards = [(10,2), (40,5), (100, 9)]
-        self.mutationProb = 0.3
+        self.limit = 96
+        self.K = 5
+        self.paramPathNum = 6
+        self.cards = sorted([(10,2), (40,5), (100, 9)])
+        self.deviation = 10
+        self.mi = 3
 
         # filename = './Data/sample.xml'
         filename = './Data/polska.xml'
@@ -18,39 +21,43 @@ class Solver:
         self.populate(self.populationSize)
     
     def loop(self, count):
-        for i in range(count):
-            # print("loop ", i)
-            self.newGeneration()
-            # for individual in self.population:
-                # print("individual: ", individual[0].getMatrix(), ", cost: ", self.evaluateIndividual(individual[0]))
-            # print("best: ", self.population[0][0].getMatrix())
+        for _ in range(count):
+            self.newGeneration(self.mi)
         best = self.population[0][0]
-        print(best.getMatrix())
-        print(self.evaluateIndividual(best))
+        print("best value: ", self.evaluateIndividual(best))
     
     def populate(self, count):
-        minCardValue = sorted(self.cards)[0][0]
-        maxCardCount = int(self.network.getMaxDemand() / minCardValue)
-        maxCardCount = 2
+        maxCardCapacity = sorted(self.cards, reverse=True)[0][0]
+        maxCardCount = int(self.network.getMaxDemand() / maxCardCapacity) + 1
         for _ in range(count):
             newChromosome = Chromosome(self.network.getDemandNum(), self.paramPathNum, len(self.cards), maxCardCount)
             newCost = self.evaluateIndividual(newChromosome)
             self.population.append((newChromosome, newCost))
     
-    def newGeneration(self):
+    def newGeneration(self, pairsNum):
         if self.population == []:
             raise Exception("Empty population, cannot generate new members")
         newPopulation = deepcopy(self.population)
-        for index in range(int(self.populationSize/2)):
-            parent1 = self.population[2*index][0]
-            parent2 = self.population[2*index + 1][0]
+        for _ in range(pairsNum):
+            parent1 = self.population[randint(0,len(self.population) - 1)][0]
+            parent2 = self.population[randint(0,len(self.population) - 1)][0]
             child1, child2 = Chromosome.kPointCrossover(parent1, parent2, self.K)
-            child1.mutation(self.mutationProb)
-            child2.mutation(self.mutationProb)
+            child1.mutation(self.deviation)
+            child2.mutation(self.deviation)
             child1Cost = self.evaluateIndividual(child1)
             child2Cost = self.evaluateIndividual(child2)
             newPopulation.append((child1, child1Cost))
             newPopulation.append((child2, child2Cost))
+        # for index in range(int(self.populationSize/2)): # just connect in pairs in order
+        #     parent1 = self.population[2*index][0]
+        #     parent2 = self.population[2*index + 1][0]
+        #     child1, child2 = Chromosome.kPointCrossover(parent1, parent2, self.K)
+        #     child1.mutation(self.deviation)
+        #     child2.mutation(self.deviation)
+        #     child1Cost = self.evaluateIndividual(child1)
+        #     child2Cost = self.evaluateIndividual(child2)
+        #     newPopulation.append((child1, child1Cost))
+        #     newPopulation.append((child2, child2Cost))
         newPopulation = sorted(newPopulation, key = lambda individual: individual[1])
         for i in range(len(self.population)):
             self.population[i] = newPopulation[i]
@@ -72,8 +79,6 @@ class Solver:
         if not(isOk):
             return float('inf')
         cost = chromosome.getCost(self.cards)
-        #print("evaluating chromosome: ", chromosome.getMatrix())
-        #print("cost: ", cost)
         return cost
     
     def __checkDemandSatisfied(self, chromosome):
@@ -87,4 +92,4 @@ class Solver:
         return True
 
 solver = Solver()
-solver.loop(5)
+solver.loop(200)

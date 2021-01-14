@@ -1,19 +1,19 @@
 from random import random, randint
+from numpy.random import normal
 
 class Allele:
-    def __init__(self, cardNum, maxValue):
+    def __init__(self, cardNum):
         self.alleleParts = []
         for _ in range(cardNum):
-            newPart = randint(0,maxValue)
-            self.alleleParts.append(newPart)
+            self.alleleParts.append(0)
+    
+    def addOneBiggest(self):
+        self.alleleParts[-1] += 1
   
-    def mutation(self, mutationProb):
+    def mutation(self, deviation):
         for i in range(len(self.alleleParts)):
-            if random() < mutationProb:
-                if random() < 0.5:
-                    self.alleleParts[i] += 1
-                else:
-                    self.alleleParts[i] = max(0,self.alleleParts[i]-1)
+            self.alleleParts[i] += int(normal(0,deviation))
+            self.alleleParts[i] = max(0,self.alleleParts[i])
     
     def getCost(self, costs):
         if len(self.alleleParts) != len(costs):
