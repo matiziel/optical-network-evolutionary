@@ -49,3 +49,11 @@ class Chromosome:
         for gene in self.genes:
             cost += gene.getCost(costs)
         return cost
+
+# parent1 = Chromosome(10,1,1,1)
+# parent2 = Chromosome(10,1,1,1)
+# print(parent1.getMatrix())
+# print(parent2.getMatrix())
+# child1, child2 = Chromosome.kPointCrossover(parent1, parent2, 2)
+# print(parent1.getMatrix())
+# print(parent2.getMatrix())
