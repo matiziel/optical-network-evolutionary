@@ -87,7 +87,7 @@
   <demand id="Demand_0_2">
    <source>Gdansk</source>
    <target>Kolobrzeg</target>
-   <demandValue>158.0</demandValue>
+   <demandValue>58.0</demandValue>
    <admissiblePaths>
     <admissiblePath id="P_0">
      <linkId>Link_0_2</linkId>
@@ -101,7 +101,7 @@
   <demand id="Demand_1_2">
    <source>Gdansk</source>
    <target>Katowice</target>
-   <demandValue>174.0</demandValue>
+   <demandValue>120.0</demandValue>
    <admissiblePaths>
     <admissiblePath id="P_0">
      <linkId>Link_1_2</linkId>

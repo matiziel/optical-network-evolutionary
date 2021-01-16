@@ -1,4 +1,4 @@
-from random import randint, sample
+from random import randint, sample, random
 from numpy.random import normal
 from Gene import Gene
 from copy import deepcopy
@@ -22,23 +22,28 @@ class Chromosome:
             chromoList.append(genList)
         return chromoList
 
-    def mutation(self, deviation):
+    def mutation(self, geneProb, deviation):
         for gene in self.genes:
-            gene.mutation(deviation)
+            if random() < geneProb:
+                gene.mutation(deviation)
 
     @staticmethod
     def kPointCrossover(chromo1, chromo2, K):
-        child1 = deepcopy(chromo1.genes)
-        child2 = deepcopy(chromo2.genes)
-        if len(child1) != len(child2):
+        child1 = []
+        child2 = []
+        if len(chromo1.genes) != len(chromo2.genes):
             raise Exception("Different gene count in crossover")
-        cutPoints = sample(range(1,len(child1)), 2)
+        cutPoints = sample(range(1,len(chromo1.genes)), K)
         swapState = True
-        for i in range(0, len(child1)):
+        for i in range(0, len(chromo1.genes)):
             if i in cutPoints:
                 swapState = not(swapState)
             if swapState:
-                child2[i], child1[i] = child1[i], child2[i]
+                child1.append(deepcopy(chromo2.genes[i]))
+                child2.append(deepcopy(chromo1.genes[i]))
+            else:
+                child1.append(deepcopy(chromo1.genes[i]))
+                child2.append(deepcopy(chromo2.genes[i]))
         result1 = Chromosome(0,0,0,0)
         result1.__setGenes(child1)
         result2 = Chromosome(0,0,0,0)
