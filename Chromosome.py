@@ -29,17 +29,17 @@ class Chromosome:
 
     @staticmethod
     def kPointCrossover(chromo1, chromo2, K):
-        child1 = []
-        child2 = []
         if len(chromo1.genes) != len(chromo2.genes):
             raise Exception("Different gene count in crossover")
+        child1 = []
+        child2 = []
         cutPoints = sample(range(1,len(chromo1.genes)), K)
         swapState = True
         for i in range(0, len(chromo1.genes)):
             if i in cutPoints:
                 swapState = not(swapState)
             if swapState:
-                child1.append(deepcopy(chromo2.genes[i]))
+                child1.append(deepcopy(chromo2.genes[i])) #dlugo kopiuje - nie wiem jak uniknac
                 child2.append(deepcopy(chromo1.genes[i]))
             else:
                 child1.append(deepcopy(chromo1.genes[i]))
@@ -55,11 +55,3 @@ class Chromosome:
         for gene in self.genes:
             cost += gene.getCost(costs)
         return cost
-
-# parent1 = Chromosome(10,1,1,1)
-# parent2 = Chromosome(10,1,1,1)
-# print(parent1.getMatrix())
-# print(parent2.getMatrix())
-# child1, child2 = Chromosome.kPointCrossover(parent1, parent2, 2)
-# print(parent1.getMatrix())
-# print(parent2.getMatrix())

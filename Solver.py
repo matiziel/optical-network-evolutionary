@@ -2,7 +2,6 @@ from Network import Network
 from Chromosome import Chromosome
 
 from random import randint
-from copy import deepcopy
 
 class Solver:
     def __init__(self):
@@ -25,7 +24,7 @@ class Solver:
             self.newGeneration()
             print("gen#: ", i, " best: ", self.population[0][1])
         best = self.population[0][0]
-        print("best value: ", best.getMatrix())
+        print("best chromosome: ", best.getMatrix())
         print("best value: ", self.evaluateIndividual(best))
     
     def populate(self, count):
@@ -35,8 +34,8 @@ class Solver:
             newChromosome = Chromosome(self.network.getDemandNum(), self.paramPathNum, len(self.cards), maxCardCount)
             newCost = self.evaluateIndividual(newChromosome)
             self.population.append((newChromosome, newCost))
-        print("first chromo: ", self.population[0][0].getMatrix())
-        print("first cost: ", self.evaluateIndividual(self.population[0][0]))
+        # print("first chromo: ", self.population[0][0].getMatrix())
+        # print("first cost: ", self.evaluateIndividual(self.population[0][0]))
     
     def newGeneration(self):
         if self.population == []:
@@ -44,29 +43,22 @@ class Solver:
         for _ in range(10):
             parent1 = self.population[randint(0,len(self.population) - 1)][0]
             parent2 = self.population[randint(0,len(self.population) - 1)][0]
-            child1, child2 = Chromosome.kPointCrossover(parent1, parent2, self.K)
+            child1, child2 = Chromosome.kPointCrossover(parent1, parent2, self.K) #75% czasu siedzi tutaj
             child1.mutation(self.geneProb, self.deviation)
             child2.mutation(self.geneProb, self.deviation)
-            child1Cost = self.evaluateIndividual(child1)
+            child1Cost = self.evaluateIndividual(child1) #20% czasu siedzi tutaj
             child2Cost = self.evaluateIndividual(child2)
             self.population.append((child1, child1Cost))
             self.population.append((child2, child2Cost))
-        # for index in range(int(self.populationSize/2)): # just connect in pairs in order
-        #     parent1 = self.population[2*index][0]
-        #     parent2 = self.population[2*index + 1][0]
-        #     child1, child2 = Chromosome.kPointCrossover(parent1, parent2, self.K)
-        #     child1.mutation(self.deviation)
-        #     child2.mutation(self.deviation)
-        #     child1Cost = self.evaluateIndividual(child1)
-        #     child2Cost = self.evaluateIndividual(child2)
-        #     self.population.append((child1, child1Cost))
-        #     self.population.append((child2, child2Cost))
         self.population = sorted(self.population, key = lambda individual: individual[1])
+        self.__killTheWeak()
+
+    def __killTheWeak(self):
         self.population = self.population[0:self.populationSize]
     
     def evaluateIndividual(self, chromosome):
         self.network.resetFlow()
-        for geneInd, gene in enumerate(chromosome.genes):
+        for geneInd, gene in enumerate(chromosome.genes): #50% czasu siedzi tutaj
             paths = self.network.getDemandPaths(geneInd, self.paramPathNum)
             for alleleInd, allele in enumerate(gene.alleles):
                 path = paths[alleleInd]
@@ -74,8 +66,7 @@ class Solver:
                 for link in path:
                     self.network.incrementFlow(link, cards)
 
-        cost = chromosome.getCost(self.cards)
-
+        cost = chromosome.getCost(self.cards) #40% czasu siedzi tutaj
         isOk = self.network.checkPathLimit(self.limit) #check if path limit 8, 16, 32, 96 satisfied
         if not(isOk):
             return cost + 60000000
