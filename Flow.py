@@ -3,8 +3,7 @@ class Flow:
         self.edges = edges
     
     def reset(self):
-        for edgeInd in self.edges:
-            self.edges[edgeInd] = 0
+        self.edges = dict.fromkeys(self.edges, 0)
     
     def increment(self, link, value):
         self.edges[link] += value

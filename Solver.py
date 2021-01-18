@@ -5,13 +5,13 @@ from random import randint
 
 class Solver:
     def __init__(self):
-        self.populationSize = 10
+        self.populationSize = 20
         self.limit = 96
         self.K = 2
         self.paramPathNum = 2
         self.cards = sorted([(10,2), (40,5), (100, 9)])
         self.deviation = 1
-        self.geneProb = 0.01
+        self.geneProb = 1/66.
 
         #filename = './Data/sample.xml'
         filename = './Data/polska.xml'
@@ -22,7 +22,9 @@ class Solver:
     def loop(self, count):
         for i in range(count):
             self.newGeneration()
-            # print("gen#: ", i, " best: ", self.population[0][1])
+            if(self.population[0][1]< 1035):
+                break
+            print("gen#: ", i, " best: ", self.population[0][1])
         best = self.population[0]
         print("best chromosome: ", best[0].genes)
         print("best value: ", best[1])
@@ -32,10 +34,11 @@ class Solver:
         maxCardCount = int(self.network.getMaxDemand() / maxCardCapacity) + 1
         for _ in range(count):
             newChromosome = Chromosome(self.network.getDemandNum(), self.paramPathNum, len(self.cards), maxCardCount)
-            newCost = self.evaluateIndividual(newChromosome)
+            newCost = self.__evaluateIndividual(newChromosome)
             self.population.append((newChromosome, newCost))
-        # print("first chromo: ", self.population[0][0].getMatrix())
-        # print("first cost: ", self.evaluateIndividual(self.population[0][0]))
+        self.population = sorted(self.population, key = lambda individual: individual[1])
+        self.__replacement()
+        print("first cost: ", self.population[0][1])
     
     def newGeneration(self):
         if self.population == []:
@@ -46,17 +49,17 @@ class Solver:
             child1, child2 = Chromosome.kPointCrossover(parent1, parent2, self.K) 
             child1.mutation(self.geneProb, self.deviation)
             child2.mutation(self.geneProb, self.deviation)
-            child1Cost = self.evaluateIndividual(child1) 
-            child2Cost = self.evaluateIndividual(child2)
+            child1Cost = self.__evaluateIndividual(child1) 
+            child2Cost = self.__evaluateIndividual(child2)
             self.population.append((child1, child1Cost))
             self.population.append((child2, child2Cost))
         self.population = sorted(self.population, key = lambda individual: individual[1])
-        self.__killTheWeak()
+        self.__replacement()
 
-    def __killTheWeak(self):
+    def __replacement(self):
         self.population = self.population[0:self.populationSize]
     
-    def evaluateIndividual(self, chromosome):
+    def __evaluateIndividual(self, chromosome):
         self.network.resetFlow()
         for geneInd, gene in enumerate(chromosome.genes):
             paths = self.network.getDemandPaths(geneInd, self.paramPathNum)
@@ -70,11 +73,11 @@ class Solver:
         isOk = self.network.checkPathLimit(self.limit) #check if path limit 8, 16, 32, 96 satisfied
         if not(isOk):
             return cost + 60000000
-            return float('inf')
+            # return float('inf')
         isOk = self.__checkDemandSatisfied(chromosome) #check if demands satisfied
         if not(isOk):
             return cost + 20000000
-            return float('inf')
+            # return float('inf')
         return cost
     
     def __checkDemandSatisfied(self, chromosome):
@@ -88,4 +91,4 @@ class Solver:
         return True
 
 solver = Solver()
-solver.loop(100)
+solver.loop(100000)
