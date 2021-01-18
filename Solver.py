@@ -6,9 +6,9 @@ from random import randint
 class Solver:
     def __init__(self):
         self.populationSize = 20
-        self.limit = 96
+        self.limit = 60
         self.K = 2
-        self.paramPathNum = 2
+        self.paramPathNum = 6
         self.cards = sorted([(10,2), (40,5), (100, 9)])
         self.deviation = 1
         self.geneProb = 1/66.
@@ -17,12 +17,12 @@ class Solver:
         filename = './Data/polska.xml'
         self.network = Network(filename)
         self.population = []
-        self.populate(self.populationSize)
+        self.populate(10000)
     
     def loop(self, count):
         for i in range(count):
             self.newGeneration()
-            if(self.population[0][1]< 1035):
+            if(self.population[0][1] < 1035):
                 break
             print("gen#: ", i, " best: ", self.population[0][1])
         best = self.population[0]
