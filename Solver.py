@@ -22,13 +22,13 @@ class Solver:
     def loop(self, count):
         for i in range(count):
             self.newGeneration()
-            print("gen#: ", i, " best: ", self.population[0][1])
-        best = self.population[0][0]
-        print("best chromosome: ", best.getMatrix())
-        print("best value: ", self.evaluateIndividual(best))
+            # print("gen#: ", i, " best: ", self.population[0][1])
+        best = self.population[0]
+        print("best chromosome: ", best[0].genes)
+        print("best value: ", best[1])
     
     def populate(self, count):
-        maxCardCapacity = sorted(self.cards, reverse=True)[0][0]
+        maxCardCapacity = self.cards[-1][0]
         maxCardCount = int(self.network.getMaxDemand() / maxCardCapacity) + 1
         for _ in range(count):
             newChromosome = Chromosome(self.network.getDemandNum(), self.paramPathNum, len(self.cards), maxCardCount)
@@ -43,10 +43,10 @@ class Solver:
         for _ in range(10):
             parent1 = self.population[randint(0,len(self.population) - 1)][0]
             parent2 = self.population[randint(0,len(self.population) - 1)][0]
-            child1, child2 = Chromosome.kPointCrossover(parent1, parent2, self.K) #75% czasu siedzi tutaj
+            child1, child2 = Chromosome.kPointCrossover(parent1, parent2, self.K) 
             child1.mutation(self.geneProb, self.deviation)
             child2.mutation(self.geneProb, self.deviation)
-            child1Cost = self.evaluateIndividual(child1) #20% czasu siedzi tutaj
+            child1Cost = self.evaluateIndividual(child1) 
             child2Cost = self.evaluateIndividual(child2)
             self.population.append((child1, child1Cost))
             self.population.append((child2, child2Cost))
@@ -58,15 +58,15 @@ class Solver:
     
     def evaluateIndividual(self, chromosome):
         self.network.resetFlow()
-        for geneInd, gene in enumerate(chromosome.genes): #50% czasu siedzi tutaj
+        for geneInd, gene in enumerate(chromosome.genes):
             paths = self.network.getDemandPaths(geneInd, self.paramPathNum)
-            for alleleInd, allele in enumerate(gene.alleles):
+            for alleleInd, _ in enumerate(gene):
                 path = paths[alleleInd]
-                cards = sum(allele.alleleParts)
+                cards = sum(chromosome.genes[geneInd,alleleInd,:])
                 for link in path:
                     self.network.incrementFlow(link, cards)
 
-        cost = chromosome.getCost(self.cards) #40% czasu siedzi tutaj
+        cost = chromosome.getCost(self.cards) 
         isOk = self.network.checkPathLimit(self.limit) #check if path limit 8, 16, 32, 96 satisfied
         if not(isOk):
             return cost + 60000000
@@ -80,8 +80,8 @@ class Solver:
     def __checkDemandSatisfied(self, chromosome):
         for geneInd, gene in enumerate(chromosome.genes):
             flow = 0
-            for allele in gene.alleles:
-                for allelePartInd, allelePart in enumerate(allele.alleleParts):
+            for allele in gene:
+                for allelePartInd, allelePart in enumerate(allele):
                     flow += allelePart * self.cards[allelePartInd][0]
             if flow < self.network.demands[geneInd].value:
                 return False

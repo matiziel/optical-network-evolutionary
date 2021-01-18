@@ -1,49 +1,45 @@
 from random import randint, sample, random
-from numpy.random import normal
-from Gene import Gene
-from copy import deepcopy
+import numpy as np
 
 class Chromosome:
     def __init__(self, geneNum, alleleNum, allelePartNum, maxValue):
-        self.genes = []
-        for _ in range(geneNum):
-            newGene = Gene(alleleNum, allelePartNum, maxValue)
-            self.genes.append(newGene)
+        self.genes = np.zeros((geneNum, alleleNum, allelePartNum), dtype = int)
+        for i in range(geneNum):
+            for _ in range(maxValue):
+                self.genes[i,randint(0,alleleNum-1),-1] += 1
 
     def __setGenes(self, genes):
         self.genes = genes
     
-    def getMatrix(self):
-        chromoList = []
-        for gene in self.genes:
-            genList = []
-            for allele in gene.alleles:
-                genList.append(allele.alleleParts)
-            chromoList.append(genList)
-        return chromoList
-
     def mutation(self, geneProb, deviation):
+        shape = self.genes.shape
         for gene in self.genes:
             if random() < geneProb:
-                gene.mutation(deviation)
+                for allele in gene:
+                    for index in range(shape[2]):
+                        allele[index] += int(np.random.normal(0,deviation))
+        self.genes = np.maximum(self.genes, 0)
 
     @staticmethod
-    def kPointCrossover(chromo1, chromo2, K):
-        if len(chromo1.genes) != len(chromo2.genes):
-            raise Exception("Different gene count in crossover")
-        child1 = []
-        child2 = []
-        cutPoints = sample(range(1,len(chromo1.genes)), K)
+    def kPointCrossover(parent1, parent2, K):
+        if parent1.genes.shape != parent2.genes.shape:
+            raise Exception("Different chromosome shape in crossover")
+        parentShape = parent1.genes.shape
+        if K > parentShape[0]:
+            raise Exception("kPointCrossover: k larger than number of genes")
+        child1 = np.zeros(parentShape, dtype=int)
+        child2 = np.zeros(parentShape, dtype=int)
+        cutPoints = sample(range(0, parentShape[0]), K)
         swapState = True
-        for i in range(0, len(chromo1.genes)):
+        for i in range(0, parentShape[0]):
             if i in cutPoints:
                 swapState = not(swapState)
             if swapState:
-                child1.append(deepcopy(chromo2.genes[i])) #dlugo kopiuje - nie wiem jak uniknac
-                child2.append(deepcopy(chromo1.genes[i]))
+                child1[i,:,:] = parent1.genes[i,:,:]
+                child2[i,:,:] = parent2.genes[i,:,:]
             else:
-                child1.append(deepcopy(chromo1.genes[i]))
-                child2.append(deepcopy(chromo2.genes[i]))
+                child1[i,:,:] = parent2.genes[i,:,:]
+                child2[i,:,:] = parent1.genes[i,:,:]
         result1 = Chromosome(0,0,0,0)
         result1.__setGenes(child1)
         result2 = Chromosome(0,0,0,0)
@@ -52,6 +48,9 @@ class Chromosome:
     
     def getCost(self, costs):
         cost = 0
+        shape = self.genes.shape
         for gene in self.genes:
-            cost += gene.getCost(costs)
+            for allele in gene:
+                for index in range(shape[2]):
+                    cost += allele[index] * costs[index][1]
         return cost
