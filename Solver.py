@@ -5,14 +5,14 @@ from random import randint
 
 
 class Solver:
-    def __init__(self, populationSize=100, limit=96, K=5, paramPathNum=3, offspringPairs=30):
+    def __init__(self, populationSize=100, limit=96, K=5, paramPathNum=3, offspringPairs=30, geneProb=1/100):
         self.populationSize = populationSize
         self.limit = limit
         self.K = K
         self.paramPathNum = paramPathNum
         self.cards = sorted([(10, 2), (40, 5), (100, 9)])
         self.deviation = 1
-        self.geneProb = 1/100.
+        self.geneProb = geneProb
         self.offspringPairs = offspringPairs
 
         filename = './Data/polska.xml'
@@ -20,18 +20,17 @@ class Solver:
         self.population = []
         self.populate(self.populationSize)
 
-    def loop(self, count, testFile):
-        with open(testFile, "w") as file:
-            for i in range(count):
-                self.newGeneration()
-                print("gen#: ", i, " best lambda: ", self.__evaluateLambdaCount(
-                    self.population[0][0]), " best cost: ", self.__evaluateCardCost(self.population[0][0]))
-                file.write(
-                    str(i) + "," + str(self.__evaluateCardCost(self.population[0][0])) + "," + str(self.__evaluateLambdaCount(
-                        self.population[0][0])) + "\n")
-            best = self.population[0]
+    def loop(self, count):
+        results = []
+        for i in range(count):
+            self.newGeneration()
+            # print("gen#: ", i, " best lambda: ", self.__evaluateLambdaCount(
+            #     self.population[0][0]), " best cost: ", self.__evaluateCardCost(self.population[0][0]))
+            results.append(self.__evaluateCardCost(self.population[0][0]))
+        best = self.population[0]
         # print("best chromosome: ", best[0].genes)
-        # print("best value: ", best[1])
+        print("best value: ", best[1])
+        return results
 
     def populate(self, count):
         maxCardCapacity = self.cards[-1][0]
@@ -109,27 +108,28 @@ class Solver:
         return cost
 
     def __evaluateIndividual(self, chromosome):
-        lambdaCount = self.__evaluateLambdaCount(chromosome)
-        coeff = 0
-
-        if lambdaCount > 96:
-            coeff = 1.
-        elif lambdaCount > 64:
-            coeff = 0.9
-        elif lambdaCount > 32:
-            coeff = 0.7
-        elif lambdaCount > 16:
-            coeff = 0.5
-        elif lambdaCount > 8:
-            coeff = 0.3
-        else:
-            coeff = 0.1
-
         cardCost = self.__evaluateCardCost(chromosome)
-        return lambdaCount*coeff + cardCost
+        return cardCost
+
+        # lambdaCount = self.__evaluateLambdaCount(chromosome)
+        # coeff = 0
+
+        # if lambdaCount > 96:
+        #     coeff = 1.
+        # elif lambdaCount > 64:
+        #     coeff = 0.9
+        # elif lambdaCount > 32:
+        #     coeff = 0.7
+        # elif lambdaCount > 16:
+        #     coeff = 0.5
+        # elif lambdaCount > 8:
+        #     coeff = 0.3
+        # else:
+        #     coeff = 0.1
+
+        # return lambdaCount*coeff + cardCost
         # return lambdaCount + cardCost/10.
         # return lambdaCount
-        # return cardCost
 
     def __checkDemandSatisfied(self, chromosome):
         for geneInd, gene in enumerate(chromosome.genes):
@@ -142,7 +142,10 @@ class Solver:
         return True
 
 
-files = ["./testFiles/testfile1.txt"]
+files = ["./testFiles/testfile1.txt",
+         "./testFiles/testfile2.txt",
+         "./testFiles/testfile3.txt",
+         "./testFiles/testfile4.txt"]
 
 
 populationSizes = [20, 50, 100, 150]
@@ -155,8 +158,22 @@ limits = [64, 96]
 
 paths = [3, 4, 5, 6, 7]
 
+geneProbs = [1/150, 1/100, 1/75, 1/50]
+
+X = list(range(1000))
+
+
+iterNumber = 10
 
 for i in range(len(files)):
-    solver = Solver(populationSize=100, limit=96, K=20,
-                    paramPathNum=4, offspringPairs=30)
-    solver.loop(1000, files[i])
+    Y = []
+    for k in range(iterNumber):
+        solver = Solver(populationSize=100, limit=96, K=20,
+                        paramPathNum=4, offspringPairs=30, geneProb=geneProbs[i])
+        Y.append(solver.loop(10))
+    with open(files[i], "w") as file:
+        for m in range(len(Y[0])):
+            resultSum = 0
+            for l in range(len(Y)):
+                resultSum += Y[l][m]
+            file.write(str(resultSum/iterNumber) + "\n")
