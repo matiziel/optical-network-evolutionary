@@ -1,38 +1,50 @@
 from Network import Network
 from Chromosome import Chromosome
 
-from random import randint
+from random import randint, seed
+from numpy import random as nprand
+import random as rand
+import numpy as np
 
 
 class Solver:
-    def __init__(self, populationSize=100, limit=96, K=5, paramPathNum=3, offspringPairs=30, geneProb=1/100):
+    def __init__(self, populationSize=50, limit=96, K=20, paramPathNum=4, offspringPairs=30, deviation=1, geneProb=1/100):
+        # program parameters-----------------------------------
         self.populationSize = populationSize
         self.limit = limit
         self.K = K
         self.paramPathNum = paramPathNum
-        self.cards = sorted([(10, 2), (40, 5), (100, 9)])
-        self.deviation = 1
-        self.geneProb = geneProb
         self.offspringPairs = offspringPairs
+        self.deviation = deviation
+        self.geneProb = geneProb
+        self.cards = sorted([(10, 2), (40, 5), (100, 9)])
+        # program parameters-----------------------------------
 
         filename = './Data/polska.xml'
         self.network = Network(filename)
         self.population = []
         self.populate(self.populationSize)
+    
+    def setSeed(self, seed):
+        np.random.seed(seed)
+        rand.seed(seed)
 
-    def loop(self, count):
-        results = []
+    def loop(self, count): # generate COUNT new generations and print the final value of the best individual
         for i in range(count):
-            self.newGeneration()
-            # print("gen#: ", i, " best lambda: ", self.__evaluateLambdaCount(
-            #     self.population[0][0]), " best cost: ", self.__evaluateCardCost(self.population[0][0]))
-            results.append(self.__evaluateCardCost(self.population[0][0]))
-        best = self.population[0]
-        # print("best chromosome: ", best[0].genes)
-        print("best value: ", best[1])
+            self.__newGeneration()
+            print("gen#: ", i, " best lambda: ", self.__computeLambdaCount(
+                self.population[0][0]), " best cost: ", self.__computeCardCost(self.population[0][0]))
+        print("best value: ", self.population[0][1])
+
+    def loopGetResults(self, count): # generate COUNT new generations and return a list of costs in each iteration
+        results = []
+        for _ in range(count):
+            self.__newGeneration()
+            results.append(self.__computeCardCost(self.population[0][0]))
+        print("best value: ", self.population[0][1])
         return results
 
-    def populate(self, count):
+    def populate(self, count): # generate population at random
         maxCardCapacity = self.cards[-1][0]
         maxCardCount = int(self.network.getMaxDemand() / maxCardCapacity) + 1
         for _ in range(count):
@@ -45,7 +57,7 @@ class Solver:
         self.__replacement()
         print("first cost: ", self.population[0][1])
 
-    def newGeneration(self):
+    def __newGeneration(self): # randomly pick parents in a loop, crossover, mutate, append to new population, sort, kill the worst
         if self.population == []:
             raise Exception("Empty population, cannot generate new members")
         for _ in range(self.offspringPairs):
@@ -55,6 +67,8 @@ class Solver:
                 parent1, parent2, self.K)
             child1.mutation(self.geneProb, self.deviation)
             child2.mutation(self.geneProb, self.deviation)
+            # print("przed")
+            # print("po")
             child1Cost = self.__evaluateIndividual(child1)
             child2Cost = self.__evaluateIndividual(child2)
             self.population.append((child1, child1Cost))
@@ -66,7 +80,7 @@ class Solver:
     def __replacement(self):
         self.population = self.population[0:self.populationSize]
 
-    def __evaluateCardCost(self, chromosome):
+    def __computeCardCost(self, chromosome):
         self.network.resetFlow()
         for geneInd, gene in enumerate(chromosome.genes):
             paths = self.network.getDemandPaths(geneInd, self.paramPathNum)
@@ -82,14 +96,13 @@ class Solver:
         if not(isOk):
             return cost + 60000000
             # return float('inf')
-        isOk = self.__checkDemandSatisfied(
-            chromosome)  # check if demands satisfied
+        isOk = self.__checkDemand(chromosome)  # check if demands satisfied
         if not(isOk):
             return cost + 20000000
             # return float('inf')
         return cost
 
-    def __evaluateLambdaCount(self, chromosome):
+    def __checkLimit(self, chromosome): # returns true if chromosome satisfies limit, returns false otherwise
         self.network.resetFlow()
         for geneInd, gene in enumerate(chromosome.genes):
             paths = self.network.getDemandPaths(geneInd, self.paramPathNum)
@@ -98,40 +111,56 @@ class Solver:
                 cards = sum(chromosome.genes[geneInd, alleleInd, :])
                 for link in path:
                     self.network.incrementFlow(link, cards)
+        return self.network.checkPathLimit(self.limit)
 
-        cost = self.network.flow.getMaxValue()
-        isOk = self.__checkDemandSatisfied(
-            chromosome)  # check if demands satisfied
-        if not(isOk):
-            return cost + 20000000
-            # return float('inf')
-        return cost
+    def __computeLambdaCount(self, chromosome):
+        self.network.resetFlow()
+        for geneInd, gene in enumerate(chromosome.genes):
+            paths = self.network.getDemandPaths(geneInd, self.paramPathNum)
+            for alleleInd, _ in enumerate(gene):
+                path = paths[alleleInd]
+                cards = sum(chromosome.genes[geneInd, alleleInd, :])
+                for link in path:
+                    self.network.incrementFlow(link, cards)
+        return self.network.flow.getMaxValue()
 
     def __evaluateIndividual(self, chromosome):
-        cardCost = self.__evaluateCardCost(chromosome)
-        return cardCost
+        return self.__EVALCostCheckLimit(chromosome) # Change evaluation method here
 
-        # lambdaCount = self.__evaluateLambdaCount(chromosome)
-        # coeff = 0
+    def __EVALLambdaAndCost(self,chromosome):
+        lSat = self.__checkLimit(chromosome)
+        dSat = self.__checkDemand(chromosome)
+        if not(lSat) or not(dSat):
+            return float('inf')
+        cardCost = self.__computeCardCost(chromosome)
+        lambdaCount = self.__computeLambdaCount(chromosome)
 
-        # if lambdaCount > 96:
-        #     coeff = 1.
-        # elif lambdaCount > 64:
-        #     coeff = 0.9
-        # elif lambdaCount > 32:
-        #     coeff = 0.7
-        # elif lambdaCount > 16:
-        #     coeff = 0.5
-        # elif lambdaCount > 8:
-        #     coeff = 0.3
-        # else:
-        #     coeff = 0.1
+        if lambdaCount > 96:
+            coeff = 1.
+        elif lambdaCount > 64:
+            coeff = 0.8
+        elif lambdaCount > 32:
+            coeff = 0.6
+        elif lambdaCount > 16:
+            coeff = 0.4
+        elif lambdaCount > 8:
+            coeff = 0.2
+        
+        return  cardCost + lambdaCount * coeff
 
-        # return lambdaCount*coeff + cardCost
-        # return lambdaCount + cardCost/10.
-        # return lambdaCount
+    def __EVALLambda(self,chromosome):
+        if not(self.__checkDemand(chromosome)):
+            return float('inf')
+        return self.__computeLambdaCount(chromosome)
 
-    def __checkDemandSatisfied(self, chromosome):
+    def __EVALCostCheckLimit(self,chromosome):
+        lSat = self.__checkLimit(chromosome)
+        dSat = self.__checkDemand(chromosome)
+        if not(lSat) or not(dSat):
+            return float('inf')
+        return self.__computeCardCost(chromosome)
+
+    def __checkDemand(self, chromosome):
         for geneInd, gene in enumerate(chromosome.genes):
             flow = 0
             for allele in gene:
@@ -140,40 +169,3 @@ class Solver:
             if flow < self.network.demands[geneInd].value:
                 return False
         return True
-
-
-files = ["./testFiles/testfile1.txt",
-         "./testFiles/testfile2.txt",
-         "./testFiles/testfile3.txt",
-         "./testFiles/testfile4.txt"]
-
-
-populationSizes = [20, 50, 100, 150]
-
-Ks = [5, 10, 20, 40]
-
-offspringPairs = [10, 20, 30, 40]
-
-limits = [64, 96]
-
-paths = [3, 4, 5, 6, 7]
-
-geneProbs = [1/150, 1/100, 1/75, 1/50]
-
-X = list(range(1000))
-
-
-iterNumber = 10
-
-for i in range(len(files)):
-    Y = []
-    for k in range(iterNumber):
-        solver = Solver(populationSize=100, limit=96, K=20,
-                        paramPathNum=4, offspringPairs=30, geneProb=geneProbs[i])
-        Y.append(solver.loop(10))
-    with open(files[i], "w") as file:
-        for m in range(len(Y[0])):
-            resultSum = 0
-            for l in range(len(Y)):
-                resultSum += Y[l][m]
-            file.write(str(resultSum/iterNumber) + "\n")

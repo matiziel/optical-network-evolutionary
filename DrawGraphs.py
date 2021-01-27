@@ -3,28 +3,28 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 
 
-X = []
-Y = [[], [], [], []]
+def draw(labels):
+    Y = []
 
+    with open("./results/test_0", "r") as file:
+        if file.closed:
+            raise Exception("Generated files are missing")
+        for i, _ in enumerate(file):
+            pass
+        X = list(range(i+1))
 
-for i in range(len(Y)):
-    with open("./testFiles/testfile" + str(i + 1) + ".txt", "r") as file:
-        for x in file:
-            s = x.split(',')
-            if(i == 0):
-                X.append(int(s[0]))
-            Y[i].append(int(s[1]))
+    for i in range(len(labels)):
+        Y.append([])
+        with open("./results/test_" + str(i), "r") as file:
+            if file.closed:
+                raise Exception("Generated files are missing")
+            for line in file:
+                number = line[:-1]
+                Y[i].append(float(number))
+        plt.plot(X, Y[i], label=labels[i])
 
+    plt.ylabel('Card cost')
+    plt.xlabel('Iteration number')
 
-plt.plot(X, Y[0], label='geneProb = 1/150')
-plt.plot(X, Y[1], label='geneProb = 1/100')
-plt.plot(X, Y[2], label='geneProb = 1/75')
-plt.plot(X, Y[3], label='geneProb = 1/50')
-
-
-plt.ylabel('Koszt transponderów')
-plt.xlabel('liczba iteracji')
-
-plt.legend()
-
-plt.show()
+    plt.legend()
+    plt.show()
