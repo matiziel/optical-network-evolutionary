@@ -45,6 +45,34 @@ class Chromosome:
         result2 = Chromosome(0,0,0,0)
         result2.__setGenes(child2)
         return result1, result2
+
+    @staticmethod
+    def kPointNParentCrossover(parents, K):
+        chromoShape = parents[0].genes.shape
+        for parent in parents:
+            if parent.genes.shape != chromoShape:
+                raise Exception("Different chromosome shape in crossover")
+        if K > chromoShape[0]:
+            raise Exception("kPointCrossover: k larger than number of genes")
+
+        results = []
+        children = []
+        for parent in parents:
+            children.append(np.zeros(chromoShape, dtype = int))
+
+        cutPoints = sample(range(0, chromoShape[0]), K)
+        swapCount = 0
+        for i in range(0, chromoShape[0]): # for each gene
+            if i in cutPoints:
+                swapCount += 1
+            for childInd, child in enumerate(children):
+                parentInd = (childInd + swapCount) % len(parents)
+                child[i,:,:] = parents[parentInd].genes[i,:,:]
+        for child in children:
+            result = Chromosome(0,0,0,0)
+            result.__setGenes(child)
+            results.append(result)
+        return results
     
     def getCost(self, costs):
         cost = 0
@@ -54,3 +82,16 @@ class Chromosome:
                 for index in range(shape[2]):
                     cost += allele[index] * costs[index][1]
         return cost
+
+chromos = []
+for i in range(3):
+    chromos.append(Chromosome(5,1,6,0))
+    chromos[i].genes += i
+
+for chromo in chromos:
+    print(chromo.genes)
+
+children = Chromosome.kPointNParentCrossover(chromos, 1)
+
+for chromo in children:
+    print(chromo.genes) # dziwne
