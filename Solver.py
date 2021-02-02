@@ -8,16 +8,17 @@ import numpy as np
 
 
 class Solver:
-    def __init__(self, populationSize=50, limit=96, K=20, paramPathNum=4, offspringPairs=30, deviation=1, geneProb=1/100):
+    def __init__(self, populationSize=50, limit=96, K=20, paramPathNum=4, offspringCount=50, deviation=1, geneProb=1/75, parentCount=2, cards=[(10, 2), (40, 5), (100, 9)]):
         # program parameters-----------------------------------
         self.populationSize = populationSize
         self.limit = limit
         self.K = K
         self.paramPathNum = paramPathNum
-        self.offspringPairs = offspringPairs
+        self.offspringCount = offspringCount
         self.deviation = deviation
         self.geneProb = geneProb
-        self.cards = sorted([(10, 2), (40, 5), (100, 9)])
+        self.cards = sorted(cards)
+        self.parentCount = parentCount
         # program parameters-----------------------------------
 
         filename = './Data/polska.xml'
@@ -34,14 +35,15 @@ class Solver:
             self.__newGeneration()
             print("gen#: ", i, " best lambda: ", self.__computeLambdaCount(
                 self.population[0][0]), " best cost: ", self.__computeCardCost(self.population[0][0]))
-        print("best value: ", self.population[0][1])
+        print("best cost: ", self.__computeCardCost(self.population[0][0]))
 
     def loopGetResults(self, count): # generate COUNT new generations and return a list of costs in each iteration
         results = []
         for _ in range(count):
             self.__newGeneration()
             results.append(self.__computeCardCost(self.population[0][0]))
-        print("best value: ", self.population[0][1])
+        print("best cost: ", self.__computeCardCost(self.population[0][0]))
+        print("best lambda: ", self.__computeLambdaCount(self.population[0][0]))
         return results
 
     def populate(self, count): # generate population at random
@@ -55,24 +57,23 @@ class Solver:
         self.population = sorted(
             self.population, key=lambda individual: individual[1])
         self.__replacement()
-        print("first cost: ", self.population[0][1])
+        print("first cost: ", self.__computeCardCost(self.population[0][0]))
 
-    def __newGeneration(self): # randomly pick parents in a loop, crossover, mutate, append to new population, sort, kill the worst
+    def __newGeneration(self): # randomly pick N parents in a loop, crossover, mutate, append to new population, sort, kill the worst
         if self.population == []:
             raise Exception("Empty population, cannot generate new members")
-        for _ in range(self.offspringPairs):
-            parent1 = self.population[randint(0, len(self.population) - 1)][0]
-            parent2 = self.population[randint(0, len(self.population) - 1)][0]
-            child1, child2 = Chromosome.kPointCrossover(
-                parent1, parent2, self.K)
-            child1.mutation(self.geneProb, self.deviation)
-            child2.mutation(self.geneProb, self.deviation)
-            # print("przed")
-            # print("po")
-            child1Cost = self.__evaluateIndividual(child1)
-            child2Cost = self.__evaluateIndividual(child2)
-            self.population.append((child1, child1Cost))
-            self.population.append((child2, child2Cost))
+        birthCount = 1 + int((self.offspringCount - 1) / self.parentCount)
+        for _ in range(birthCount):
+            parents = []
+            for _ in range(self.parentCount):
+                parent = self.population[randint(0, len(self.population) - 1)][0]
+                parents.append(parent)
+
+            children = Chromosome.kPointNParentCrossover(parents, self.K)
+            for child in children:
+                child.mutation(self.geneProb, self.deviation)
+                childCost = self.__evaluateIndividual(child)
+                self.population.append((child, childCost))
         self.population = sorted(
             self.population, key=lambda individual: individual[1])
         self.__replacement()
@@ -125,7 +126,7 @@ class Solver:
         return self.network.flow.getMaxValue()
 
     def __evaluateIndividual(self, chromosome):
-        return self.__EVALCostCheckLimit(chromosome) # Change evaluation method here
+        return self.__EVALLambdaAndCost(chromosome) # Change evaluation method here
 
     def __EVALLambdaAndCost(self,chromosome):
         lSat = self.__checkLimit(chromosome)

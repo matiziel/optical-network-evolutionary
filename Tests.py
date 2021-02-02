@@ -3,21 +3,25 @@ from DrawGraphs import draw
 
 seed = 0
 
-iterNumber = 1000
-repeatNumber = 10
+iterNumber = 5000
+repeatNumber = 1
 
-testedValues = [1/50, 1/75, 1/100, 1/150]
+testedValues = [[(5, 2), (10, 3), (50, 4), (150,14), (100, 10), (200, 26)]]
 labels = []
 for i in testedValues:
-    labels.append("geneProb = " + str(format(i, '.3g')))
-
+    # labels.append("parentCount = " + str(format(i, '.3g')))
+    label = ""
+    for j in i:
+        label += str(j[0]) + ", " + str(j[1]) + "      "
+    labels.append("Card costs = " + label)
 
 for versionInd in range(len(testedValues)):
-
+    print("Version " + str(versionInd))
     results = []
     for k in range(repeatNumber):
-        solver = Solver(geneProb=testedValues[versionInd], offspringPairs=3, populationSize=10)
-        # solver.setSeed(seed)
+        print("Iteration " + str(k))
+        solver = Solver(cards=testedValues[versionInd])
+        solver.setSeed(0)
         results.append(solver.loopGetResults(iterNumber))
 
     resultAverage = []

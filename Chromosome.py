@@ -82,16 +82,3 @@ class Chromosome:
                 for index in range(shape[2]):
                     cost += allele[index] * costs[index][1]
         return cost
-
-chromos = []
-for i in range(3):
-    chromos.append(Chromosome(5,1,6,0))
-    chromos[i].genes += i
-
-for chromo in chromos:
-    print(chromo.genes)
-
-children = Chromosome.kPointNParentCrossover(chromos, 1)
-
-for chromo in children:
-    print(chromo.genes) # dziwne
